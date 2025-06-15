@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Add this to your Tailwind utilities if needed */
+.signOutBtn {
+  @apply relative z-50;
+}

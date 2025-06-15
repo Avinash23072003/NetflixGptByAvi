@@ -1,13 +1,11 @@
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { auth } from "../utils/firebase";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
 import { addUser, removeUser } from "../utils/userSlice";
-import { LOGO_URL } from "../utils/constans";
+import { LOGO_URL, SUPPORTED_LANGUAGE } from "../utils/constans";
 import { showGPTSearchView } from "../utils/gptSearchSlice";
-import { SUPPORTED_LANGUAGE } from "../utils/constans";
 import { languageChange } from "../utils/configSlice";
 
 const Header = () => {
@@ -15,78 +13,68 @@ const Header = () => {
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
   const showgptSearch = useSelector((store) => store.gpt.showgptsearch);
-  const signOutMethod = () => {
-    signOut(auth)
-      .then(() => {
-        //navigate("/");
-      })
-      .catch((error) => {
-        // navigate("/error");
-      });
+
+  // Only call navigate on explicit sign-out
+  const signOutMethod = async () => {
+    try {
+      await signOut(auth);
+      navigate("/");
+      console.log("Sign Out successfully");
+    } catch (err) {
+      console.error("Sign-out error:", err);
+    }
   };
-  const unsubscribe = useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/auth.user
-        const { uid, email, displayName, photoURL } = user;
-        dispatch(
-          addUser({
-            uid: uid,
-            email: email,
-            displayName: displayName,
-            photoURL: photoURL,
-          })
-        );
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        dispatch(addUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || "",
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL || "",
+        }));
         navigate("/browse");
-        // ...
       } else {
-        // User is signed out
         dispatch(removeUser());
-        navigate("/");
+        // no navigate here
       }
     });
+    return unsubscribe;
+  }, [dispatch, navigate]);
 
-    return () => unsubscribe;
-  }, []);
-
-  const handleGptSearchBtn = () => {
-    dispatch(showGPTSearchView());
-  };
-
-  const handleLang = (e) => {
-    dispatch(languageChange(e.target.value));
-  };
   return (
-    <div className=" w-full p-2  absolute z-10  justify-between bg-gradient-to-b from-black   flex flex-col md:flex-row sm:mb-96">
-      <img
-        src={LOGO_URL}
-        alt="logo"
-        className="mt-4 w-[180px] mx-auto md:mx-0"
-      />
+    <div className="w-full p-2  absolute z-50 flex flex-col md:flex-row justify-between bg-gradient-to-b from-black">
+      <img src={LOGO_URL} alt="logo" className="mt-4 w-[180px] mx-auto md:mx-0" />
+
       {user && (
-        <div className="flex pt-4">
+        <div className="flex items-center pt-4">
           {showgptSearch && (
             <select
-              className="pl-6 mt-4  bg-gray-800 w-20.5 h-10 mr-4 rounded-md text-white"
-              onChange={handleLang}
+              className="pl-6 mt-4 bg-gray-800 w-20.5 h-10 mr-4 rounded-md text-white"
+              onChange={(e) => dispatch(languageChange(e.target.value))}
             >
-              {SUPPORTED_LANGUAGE.map((language) => (
-                <option key={language.identifier} value={language.identifier}>
-                  {language.name}
+              {SUPPORTED_LANGUAGE.map((lang) => (
+                <option key={lang.identifier} value={lang.identifier}>
+                  {lang.name}
                 </option>
               ))}
             </select>
           )}
 
           <button
-            className="pr-6 mt-4 pl-4 bg-purple-800 w-22 h-10 mr-4 rounded-md text-white "
-            onClick={handleGptSearchBtn}
+            className="pr-6 mt-4 pl-4 bg-purple-800 w-22 h-10 mr-4 rounded-md text-white"
+            onClick={() => dispatch(showGPTSearchView())}
           >
-            {showgptSearch ? "Home page " : "GPT search"}
+            {showgptSearch ? "Home page" : "GPT search"}
           </button>
-          <img src={user?.photoURL} className="pr-2 w-14 h-14" />
-          <button onClick={signOutMethod} className="text-white  text-center">
+
+          <img src={user.photoURL} className="pr-2 w-14 h-14 rounded-full" />
+
+          <button
+            onClick={signOutMethod}
+            className="text-white text-center cursor-pointer"
+          >
             Sign Out
           </button>
         </div>
@@ -94,4 +82,5 @@ const Header = () => {
     </div>
   );
 };
+
 export default Header;
