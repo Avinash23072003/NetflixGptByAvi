@@ -20,4 +20,4 @@ export const SUPPORTED_LANGUAGE = [
 ];
 const apiKey = import.meta.env.VITE_API_KEY;
 export const GEMINI_API =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAEkgvn-F90h0IqIt-jn2uyB4AwZC4ugEM" 
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}` 
