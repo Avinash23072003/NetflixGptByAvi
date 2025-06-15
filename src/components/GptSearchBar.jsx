@@ -90,8 +90,6 @@ const GptSearchBar = () => {
 
   return (
     <div className="relative">
-     
-
       <div className="pt-[50%] md:pt-[15%] flex flex-col items-center justify-center">
         {/* Loader */}
         {loading && (
@@ -102,7 +100,7 @@ const GptSearchBar = () => {
 
         {/* Form */}
         <form
-          className="flex flex-col sm:flex-row items-center justify-center bg-black bg-opacity-70 p-6 rounded-xl shadow-lg w-[90%] md:w-1/2 mx-auto"
+          className="flex flex-col md:flex-row items-center justify-center bg-black bg-opacity-70 p-6 rounded-xl shadow-lg w-full max-w-xl mx-auto"
           onSubmit={(e) => {
             e.preventDefault();
             gptSearchBtn();
@@ -112,11 +110,11 @@ const GptSearchBar = () => {
             ref={searchText}
             type="text"
             placeholder={languageConstants[languageSelector].gptPlaceHolder}
-            className="min-w-[600px] sm:min-w-[400px] flex-1 p-4 rounded-l-md text-black outline-none"
+            className="w-full md:flex-1 p-4 rounded-md text-black outline-none mb-4 md:mb-0 md:mr-2"
           />
           <button
             type="submit"
-            className="mt-4 sm:mt-0 sm:ml-2 px-6 py-3 bg-red-800 text-white font-semibold rounded-md hover:bg-red-700 transition duration-300"
+            className="w-full md:w-auto px-6 py-3 bg-red-800 text-white font-semibold rounded-md hover:bg-red-700 transition duration-300"
           >
             {languageConstants[languageSelector].search}
           </button>
